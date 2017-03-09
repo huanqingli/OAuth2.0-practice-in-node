@@ -1,6 +1,8 @@
 /**
  * Created by Muc on 17/3/7.
  */
+var https=require('https');
+
 var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
@@ -71,8 +73,24 @@ passport.use('provider', new OAuth2Strategy({
         callbackURL: '/auth/provider/callback'
     },
     function(accessToken, refreshToken, profile, done) {
-        User.findOrCreate(profile, function(err, user) {
-            done(err, user);
+        https.get("https://openapi.baidu.com/rest/2.0/passport/users/getInfo?access_token="+accessToken,function (req,res) {
+            var html='';
+            req.on('data',function(data){
+                html+=data;
+            });
+            req.on('end',function(){
+                html=JSON.parse(html);
+                var user={
+                    username: html.username,
+                };
+                https.get("https://openapi.baidu.com/rest/2.0/passport/auth/revokeAuthorization?access_token="+accessToken);
+                User.findOne(user, function(err, item) {
+                    if(item) return done(err, item);
+                    User.create(user,function (err,user) {
+                        done(err, user);
+                    });
+                });
+            });
         });
     }
 ));

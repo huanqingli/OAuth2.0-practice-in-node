@@ -10,11 +10,9 @@ router.get('/', (req, res) => {
     res.render('index', { user : req.user });
 });
 
-
 router.get('/register', (req, res) => {
     res.render('register', { });
 });
-
 
 router.post('/register', (req, res, next) => {
     var user = {
@@ -30,7 +28,6 @@ router.post('/register', (req, res, next) => {
         });
     });
 });
-
 
 router.get('/login', (req, res) => {
     res.render('login');
